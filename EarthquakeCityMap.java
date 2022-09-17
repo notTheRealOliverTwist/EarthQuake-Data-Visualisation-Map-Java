@@ -25,20 +25,11 @@ import processing.core.PGraphics;
 
 /**
  * EarthquakeCityMap An application with an interactive map displaying
- * earthquake data. Author: UC San Diego Intermediate Software Development MOOC
- * team
+ * earthquake data
  * 
- * @author Your name here Date: July 17, 2015
+ * @NotReallyOliverTwist
  */
 public class EarthquakeCityMap extends PApplet {
-
-	// We will use member variables, instead of local variables, to store the data
-	// that the setup and draw methods will need to access (as well as other
-	// methods)
-	// You will use many of these variables, but the only one you should need to add
-	// code to modify is countryQuakes, where you will store the number of
-	// earthquakes
-	// per country.
 
 	// You can ignore this. It's to get rid of eclipse warnings
 	private static final long serialVersionUID = 1L;
@@ -78,15 +69,18 @@ public class EarthquakeCityMap extends PApplet {
 	HashMap<String, Float> lifeExpMap;
 	List<Feature> countries;
 
-	// NEW IN MODULE 5
+	// Used for hover effect of markers
 	private CommonMarker lastSelected;
+	// Used to hide other markers, except for one that was clicked on
 	private CommonMarker lastClicked;
 	
 	public void setup() {
 		// (1) Initializing canvas and map tiles
 		size(displayWidth, displayHeight,OPENGL);
 		if (offline) {
+			// map is for earthquake data
 			map = new UnfoldingMap(this, 0, 0, displayWidth, displayHeight, new MBTilesMapProvider(mbTilesString));
+			// map2 is for life expectancy
 			map2 = new UnfoldingMap(this,displayWidth-300,25,300,displayHeight,new MBTilesMapProvider(mbTilesString));
 			//earthquakesURL = "2.5_week.atom"; // The same feed, but saved August 7, 2015
 		} else {
@@ -100,16 +94,16 @@ public class EarthquakeCityMap extends PApplet {
 		MapUtils.createDefaultEventDispatcher(this, map2);
 
 		// (2) Reading in earthquake data and geometric properties
-		// STEP 1: load country features and markers
 		List<Feature> countries = GeoJSONReader.loadData(this, countryFile);
 		countryMarkers = MapUtils.createSimpleMarkers(countries);
 
-		// STEP 2: read in city data
+		// read in city data
 		List<Feature> cities = GeoJSONReader.loadData(this, cityFile);
 		cityMarkers = new ArrayList<Marker>();
 		for (Feature city : cities) {
 			cityMarkers.add(new CityMarker(city));
 		}
+		// read in airport data
 		List<PointFeature> airports = ParseFeed.parseAirports(this, airportFile);
 		airportMarkers = new ArrayList<Marker>();
 		
@@ -119,7 +113,7 @@ public class EarthquakeCityMap extends PApplet {
 			airportMarkers.add(m);
 		}
 
-		// STEP 3: read in earthquake RSS feed
+		// read in earthquake RSS feed
 		List<PointFeature> earthquakes = ParseFeed.parseEarthquake(this, earthquakesURL);
 		quakeMarkers = new ArrayList<Marker>();
 
@@ -134,9 +128,9 @@ public class EarthquakeCityMap extends PApplet {
 			}
 		}
 		
+		// read in life expecatancy data
 		lifeExpMap = ParseFeed.loadLifeExpectancyFromCSV(this,"LifeExpectancyWorldBank.csv");
 		
-
 		// Load country polygons and adds them as markers
 		countries = GeoJSONReader.loadData(this, "countries.geo.json");
 		countryMarkers = MapUtils.createSimpleMarkers(countries);
@@ -146,7 +140,7 @@ public class EarthquakeCityMap extends PApplet {
 		shadeCountries();
 
 		// could be used for debugging
-		printQuakes();
+		//printQuakes();
 
 		// (3) Add markers to map
 		// NOTE: Country markers are not added to the map. They are used
@@ -166,6 +160,7 @@ public class EarthquakeCityMap extends PApplet {
 		map.draw();
 		map2.draw();
 		addKey();
+		// displays card with information about the icon hovered over.
 		if (lastSelected != null) {
 			lastSelected.drawTitle(this.g, mouseX, mouseY);
 		}
@@ -190,6 +185,9 @@ public class EarthquakeCityMap extends PApplet {
 			}
 		}
 	}
+	
+	// Used to hide / unhide the relevant icons. This may be simplified to one method, 
+	// however for the purposes of allowing one the option of adding a filter list. This has been done accordingly.
 	
 	private void unhideCities() {
 		for(Marker m : cityMarkers) {
@@ -240,7 +238,7 @@ public class EarthquakeCityMap extends PApplet {
 
 	// If there is a marker under the cursor, and lastSelected is null
 	// set the lastSelected to be the first marker found under the cursor
-	// Make sure you do not select two markers.
+	// Make sure you do not select two markers. Zoom in by double clicking if no data is being displayed.
 	//
 	private void selectMarkerIfHover(List<Marker> markers) {
 		// TODO: Implement this method
@@ -285,6 +283,10 @@ public class EarthquakeCityMap extends PApplet {
 			}
 		}
 	}
+	// Below methods check to see if their respective markers were clicked 
+	// and if so which marker within the Marker list was clicked.
+	// Once that marker has been established, it is then returned to the above method and
+	// marker.setHidden(false) is thus called upon to display only the marker you clicked on
 	
 	private Marker checkEarthquakeMarker() {
 		for(Marker marker: quakeMarkers) {
@@ -305,6 +307,8 @@ public class EarthquakeCityMap extends PApplet {
 		}
 		return null;
 	}
+	// Used to display all airports that are established to be contained within the threat circle of 
+	// an earthquake
 	
 	private void displayAirports(Marker marker) {
 		double rad = ((EarthquakeMarker)marker).threatCircle();
@@ -319,6 +323,8 @@ public class EarthquakeCityMap extends PApplet {
 			}
 		}
 	}
+	// Used to display all cities that are established to be contained within the threat circle of 
+	// an earthquake
 	
 	private void displayCity(Marker marker) {
 		double rad = ((EarthquakeMarker)marker).threatCircle();
@@ -333,6 +339,7 @@ public class EarthquakeCityMap extends PApplet {
 			}
 		}
 	}
+	// Calls on the relevant methods to hide all markers
 	
 	private void clearMarkers() {
 		hideCities();
@@ -483,7 +490,7 @@ public class EarthquakeCityMap extends PApplet {
 	// This will also add the country property to the properties of the earthquake
 	// feature if
 	// it's in one of the countries.
-	// You should not have to modify this code
+
 	private boolean isInCountry(PointFeature earthquake, Marker country) {
 		// getting location of feature
 		Location checkLoc = earthquake.getLocation();
@@ -513,7 +520,8 @@ public class EarthquakeCityMap extends PApplet {
 		}
 		return false;
 	}
-	
+	// Method used to sort quakes according to their magnitude. This may be used by the users to customize the earth quakes they wish to display.
+	// May be used as an additional filter method.
 	private void sortAndPrint(int numToPrint) {
 		ArrayList<EarthquakeMarker> sortedQuakes = new ArrayList<EarthquakeMarker>();
 		for(Marker m : quakeMarkers){
