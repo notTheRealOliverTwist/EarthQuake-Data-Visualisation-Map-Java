@@ -10,7 +10,7 @@ import processing.core.PGraphics;
 /** 
  * A class to represent AirportMarkers on a world map.
  *   
- * @Adam Setters && UCSandiego
+ * @NotReallyOliverTwist
  *
  */
 public class AirportMarker extends CommonMarker {
