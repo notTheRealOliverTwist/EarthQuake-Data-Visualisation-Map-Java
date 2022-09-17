@@ -5,6 +5,7 @@ import de.fhpotsdam.unfolding.utils.MapUtils;
 
 /**
  * This example uses a local MBTiles file. Thus, it does not need an Internet connection to load tiles.
+ * For reference purposes only. This may be done in the original EarthquakeCityMap.java file
  */
 public class OfflineMapApp extends PApplet {
 
