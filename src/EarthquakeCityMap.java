@@ -173,7 +173,6 @@ public class EarthquakeCityMap extends PApplet {
 		for (Marker marker : countryMarkers) {
 			// Find data for country of the current marker
 			String countryId = marker.getId();
-			System.out.println(lifeExpMap.containsKey(countryId));
 			if (lifeExpMap.containsKey(countryId)) {
 				float lifeExp = lifeExpMap.get(countryId);
 				// Encode value as brightness (values range: 40-90)
@@ -246,7 +245,7 @@ public class EarthquakeCityMap extends PApplet {
 			if (m.isInside(map, mouseX, mouseY)) {
 				lastSelected = (CommonMarker) m;
 				lastSelected.setSelected(true);
-				System.out.println(m.getStringProperty("name"));
+
 				break;
 			}
 		}
